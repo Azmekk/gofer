@@ -10,6 +10,61 @@ import (
 	"github.com/fatih/color"
 )
 
+// hasVisibleContent returns true if s contains characters other than ANSI escape sequences.
+func hasVisibleContent(s string) bool {
+	inEscape := false
+	for _, r := range s {
+		if r == '\x1b' {
+			inEscape = true
+			continue
+		}
+		if inEscape {
+			if (r >= 'a' && r <= 'z') || (r >= 'A' && r <= 'Z') {
+				inEscape = false
+			}
+			continue
+		}
+		return true
+	}
+	return false
+}
+
+// SerialWriter serializes writes from multiple goroutines through a single channel.
+// This ensures atomic line output without interleaving ANSI codes.
+type SerialWriter struct {
+	ch   chan []byte
+	done chan struct{}
+}
+
+// NewSerialWriter creates a writer that serializes all writes to dest via a goroutine.
+func NewSerialWriter(dest io.Writer) *SerialWriter {
+	sw := &SerialWriter{
+		ch:   make(chan []byte, 100),
+		done: make(chan struct{}),
+	}
+	go func() {
+		for data := range sw.ch {
+			dest.Write(data)
+		}
+		close(sw.done)
+	}()
+	return sw
+}
+
+func (sw *SerialWriter) Write(p []byte) (int, error) {
+	// Copy to avoid data races (caller may reuse buffer)
+	cp := make([]byte, len(p))
+	copy(cp, p)
+	sw.ch <- cp
+	return len(p), nil
+}
+
+// Close shuts down the writer goroutine and waits for it to finish.
+func (sw *SerialWriter) Close() {
+	close(sw.ch)
+	<-sw.done
+}
+
 // Color palette for concurrent step labels.
 var labelColors = []*color.Color{
 	color.New(color.FgCyan),
@@ -104,6 +159,7 @@ func (pw *PrefixWriter) Write(p []byte) (int, error) {
 }
 
 // Flush writes any remaining buffered content as a final line.
+// Content that is purely ANSI escape codes (no visible characters) is discarded.
 func (pw *PrefixWriter) Flush() error {
 	pw.mu.Lock()
 	defer pw.mu.Unlock()
@@ -111,8 +167,11 @@ func (pw *PrefixWriter) Flush() error {
 	if pw.buf.Len() > 0 {
 		line := pw.buf.String()
 		pw.buf.Reset()
-		_, err := fmt.Fprintf(pw.dest, "%s%s\n", pw.prefix, line)
-		return err
+		// Only output if there's visible content (not just ANSI codes)
+		if hasVisibleContent(line) {
+			_, err := fmt.Fprintf(pw.dest, "%s%s\n", pw.prefix, line)
+			return err
+		}
 	}
 	return nil
 }

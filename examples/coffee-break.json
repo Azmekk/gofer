@@ -3,42 +3,84 @@
     "brew": {
       "desc": "Brew a fresh cup of coffee",
       "params": [
-        { "name": "roast", "default": "dark" },
-        { "name": "cups", "default": "1" }
+        {
+          "name": "roast",
+          "default": "dark"
+        },
+        {
+          "name": "cups",
+          "default": "1"
+        }
       ],
       "steps": [
-        { "name": "grind", "cmd": "echo Grinding {{.roast}} roast beans..." },
-        { "name": "heat", "cmd": "echo Heating water to 96C..." },
-        { "name": "pour", "cmd": "echo Brewing {{.cups}} cups of {{.roast}} roast coffee..." },
-        { "name": "serve", "cmd": "echo Coffee is ready! Enjoy your {{.cups}} cups." }
+        {
+          "name": "grind",
+          "cmd": "echo Grinding {{.roast}} roast beans..."
+        },
+        {
+          "name": "heat",
+          "cmd": "echo Heating water to 96C..."
+        },
+        {
+          "name": "pour",
+          "cmd": "echo Brewing {{.cups}} cups of {{.roast}} roast coffee..."
+        },
+        {
+          "name": "serve",
+          "cmd": "echo Coffee is ready! Enjoy your {{.cups}} cups."
+        }
       ]
     },
     "standup": {
       "desc": "Run the daily standup",
       "steps": [
-        { "cmd": "echo === Daily Standup ===" },
+        {
+          "cmd": "echo === Daily Standup ==="
+        },
         {
           "concurrent": [
-            { "name": "status", "cmd": "echo Yesterday: wrote code && echo Today: write more code && echo Blockers: coffee machine is broken && echo Action: fix coffee machine" },
-            { "name": "multitask", "cmd": "echo Checking emails... && echo Reading Slack... && echo Updating Jira tickets... && echo Pretending to take notes..." }
+            {
+              "name": "status",
+              "cmd": "echo Yesterday: wrote code && echo Today: write more code && echo Blockers: coffee machine is broken && echo Action: fix coffee machine"
+            },
+            {
+              "name": "multitask",
+              "cmd": "echo Checking emails... && echo Reading Slack... && echo Updating Jira tickets... && echo Pretending to take notes..."
+            }
           ]
         },
-        { "cmd": "echo Standup complete. Back to work!" }
+        {
+          "cmd": "echo Standup complete. Back to work!"
+        }
       ]
     },
     "deploy-friday": {
       "desc": "Deploy on a Friday (what could go wrong?)",
       "group": "yolo",
       "steps": [
-        { "cmd": "echo WARNING: It is Friday. Deploying anyway..." },
+        {
+          "name": "warning",
+          "cmd": "echo WARNING: It is Friday. Deploying anyway..."
+        },
         {
           "concurrent": [
-            { "name": "lint", "cmd": "echo [lint] Checking style... && echo [lint] 47 warnings found && echo [lint] Ignoring all of them && echo [lint] Lint passed (sort of)" },
-            { "name": "test", "cmd": "echo [test] Running unit tests... && echo [test] 12 passed, 3 skipped && echo [test] Running integration tests... && echo [test] All green (probably)" },
-            { "name": "build", "cmd": "echo [build] Compiling assets... && echo [build] Bundling... && echo [build] Minifying... && echo [build] Build complete!" }
+            {
+              "name": "lint",
+              "cmd": "echo Checking style... && echo 47 warnings found && echo Ignoring all of them && echo Lint passed (sort of)"
+            },
+            {
+              "name": "test",
+              "cmd": "echo Running unit tests... && echo 12 passed, 3 skipped && echo Running integration tests... && echo All green (probably)"
+            },
+            {
+              "name": "build",
+              "cmd": "echo Compiling assets... && echo Bundling... && echo Minifying... && echo Build complete!"
+            }
           ]
         },
-        { "cmd": "echo Deployed! Have a great weekend!" }
+        {
+          "cmd": "echo Deployed! Have a great weekend!"
+        }
       ]
     }
   }

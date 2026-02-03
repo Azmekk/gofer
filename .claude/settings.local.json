@@ -3,7 +3,8 @@
     "allow": [
       "Bash(go build:*)",
       "Bash(src/bin/gofer hello:*)",
-      "Bash(src/bin/gofer:*)"
+      "Bash(src/bin/gofer:*)",
+      "Bash(src/bin/gofer.exe:*)"
     ]
   }
 }

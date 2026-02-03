@@ -120,6 +120,10 @@ func (e *Executor) executeConcurrent(steps []config.Step, params map[string]stri
 	label := fmt.Sprintf("concurrent (%d steps)", n)
 	output.PrintStepStart(e.Stderr, label)
 
+	// Create serialized writers for atomic output
+	stdoutSerial := output.NewSerialWriter(e.Stdout)
+	stderrSerial := output.NewSerialWriter(e.Stderr)
+
 	var (
 		wg   sync.WaitGroup
 		mu   sync.Mutex
@@ -133,8 +137,8 @@ func (e *Executor) executeConcurrent(steps []config.Step, params map[string]stri
 
 			stepLabel := output.StepLabel(s, idx)
 			c := output.LabelColor(idx)
-			pw := output.NewPrefixWriter(e.Stdout, stepLabel, c)
-			pwErr := output.NewPrefixWriter(e.Stderr, stepLabel, c)
+			pw := output.NewPrefixWriter(stdoutSerial, stepLabel, c)
+			pwErr := output.NewPrefixWriter(stderrSerial, stepLabel, c)
 
 			child := &Executor{
 				Config:  e.Config,
@@ -157,6 +161,10 @@ func (e *Executor) executeConcurrent(steps []config.Step, params map[string]stri
 	}
 
 	wg.Wait()
+
+	// Close serial writers to flush any pending output
+	stdoutSerial.Close()
+	stderrSerial.Close()
 
 	joined := errors.Join(errs...)
 	if joined != nil {
