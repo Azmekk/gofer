@@ -85,7 +85,7 @@ func (e *Executor) executeStep(step config.Step, params map[string]string, index
 			output.PrintStepFail(e.Stderr, label, err)
 			return err
 		}
-		cmd := ShellCommand(resolved, step.Shell)
+		cmd := ShellCommand(resolved)
 		cmd.Env = e.Env
 		cmd.Stdout = e.Stdout
 		cmd.Stderr = e.Stderr

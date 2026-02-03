@@ -20,7 +20,6 @@ type Step struct {
 	Ref        string `json:"ref,omitempty"`
 	Concurrent []Step `json:"concurrent,omitempty"`
 	OS         string `json:"os,omitempty"`
-	Shell      string `json:"shell,omitempty"`
 }
 
 type Task struct {

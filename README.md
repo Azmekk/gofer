@@ -13,7 +13,7 @@ A JSON-based task runner for defining and executing parameterized shell commands
 - Environment variable loading from `.env.gofer` (or custom path)
 - Circular reference detection
 - Built-in config validation
-- Configurable shell per step (`sh`, `bash`, `cmd`, `powershell`, `pwsh`)
+- Cross-platform: `sh -c` on unix, `cmd /C` on windows
 - Step output formatting with status indicators (▸/✓/✗) and colored `[label]` prefixes for concurrent output
 - Remote configs via `--config https://...`
 
@@ -232,7 +232,6 @@ Each step must have exactly one of `cmd`, `ref`, or `concurrent`.
 | `concurrent` | Array of steps to run in parallel |
 | `name` | Optional display label for the step (used in output formatting) |
 | `os` | Restrict to an OS: `linux`, `darwin`, `windows`, or `*` (default: run always) |
-| `shell` | Shell to use: `sh`, `bash`, `cmd`, `powershell`, or `pwsh` (default: `bash` on Linux/macOS, `powershell` on Windows) |
 
 ### Environment file
 
