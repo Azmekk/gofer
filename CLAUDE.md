@@ -2,6 +2,17 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Code Style (IMPORTANT)
+
+**Use clear, descriptive variable names.** Do not use short or abbreviated variable names like `p`, `s`, `n`, `cfg`, `err` (except `err` for errors, which is idiomatic Go). Variable names should be immediately understandable without context. For example:
+- `data` instead of `p`
+- `step` instead of `s`
+- `config` instead of `cfg`
+- `count` instead of `n`
+- `index` instead of `i` (in most cases)
+
+This rule is non-negotiable. Readable code is more important than saving keystrokes.
+
 ## Build
 
 All source code is under `src/`. There is no Makefile.

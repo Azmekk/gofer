@@ -132,3 +132,5 @@ gofer -c https://raw.githubusercontent.com/Azmekk/gofer/main/examples/coffee-bre
 5. **No shell escaping.** Param values are interpolated directly into shell commands via Go templates. This is expected for a local task runner (you run your own commands), but worth being conscious of.
 
 6. **The `output` package depends on `fatih/color`.** This is the only non-Cobra external dependency. It respects the `NO_COLOR` environment variable automatically.
+
+7. **ANSI reset codes and PrefixWriter.** The `fatih/color` library outputs escape sequences in the form `\x1b[1mtext\n\x1b[0m` — the reset comes *after* the newline. Since `PrefixWriter` splits output on newlines and buffers post-newline content for the next line, this causes the reset code to get separated from its colored text. Without mitigation, attributes like bold bleed into subsequent lines, causing visual glitches (colors appearing brighter/darker randomly). The fix is to explicitly append `\x1b[0m` at the end of each line in `PrefixWriter.Write()` and `Flush()` before the newline.

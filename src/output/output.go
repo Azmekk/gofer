@@ -136,24 +136,31 @@ func NewPrefixWriter(dest io.Writer, label string, c *color.Color) *PrefixWriter
 	}
 }
 
-func (pw *PrefixWriter) Write(p []byte) (int, error) {
+// ansiReset resets all terminal attributes
+const ansiReset = "\x1b[0m"
+
+// Write buffers input until a newline, then writes the complete line with the
+// colored prefix prepended and an ANSI reset appended.
+func (pw *PrefixWriter) Write(data []byte) (int, error) {
 	pw.mu.Lock()
 	defer pw.mu.Unlock()
 
-	total := len(p)
-	for len(p) > 0 {
-		idx := bytes.IndexByte(p, '\n')
+	total := len(data)
+	for len(data) > 0 {
+		idx := bytes.IndexByte(data, '\n')
 		if idx == -1 {
-			pw.buf.Write(p)
+			pw.buf.Write(data)
 			break
 		}
-		pw.buf.Write(p[:idx])
+		pw.buf.Write(data[:idx])
 		line := pw.buf.String()
 		pw.buf.Reset()
-		if _, err := fmt.Fprintf(pw.dest, "%s%s\n", pw.prefix, line); err != nil {
+		// Add reset at end of line - fatih/color puts reset after newline,
+		// but we split on newline so the reset gets lost
+		if _, err := fmt.Fprintf(pw.dest, "%s%s%s\n", pw.prefix, line, ansiReset); err != nil {
 			return total, err
 		}
-		p = p[idx+1:]
+		data = data[idx+1:]
 	}
 	return total, nil
 }
@@ -169,7 +176,7 @@ func (pw *PrefixWriter) Flush() error {
 		pw.buf.Reset()
 		// Only output if there's visible content (not just ANSI codes)
 		if hasVisibleContent(line) {
-			_, err := fmt.Fprintf(pw.dest, "%s%s\n", pw.prefix, line)
+			_, err := fmt.Fprintf(pw.dest, "%s%s%s\n", pw.prefix, line, ansiReset)
 			return err
 		}
 	}
