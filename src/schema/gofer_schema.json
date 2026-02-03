@@ -1,0 +1,53 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Gofer Configuration",
+  "type": "object",
+  "required": ["tasks"],
+  "properties": {
+    "env_file": {
+      "type": "string"
+    },
+    "tasks": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["desc", "steps"],
+        "properties": {
+          "desc": { "type": "string" },
+          "group": { "type": "string" },
+          "params": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["name"],
+              "properties": {
+                "name": { "type": "string" },
+                "default": { "type": "string" }
+              }
+            }
+          },
+          "steps": {
+            "type": "array",
+            "items": { "$ref": "#/definitions/step" }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "step": {
+      "type": "object",
+      "properties": {
+        "cmd": { "type": "string" },
+        "ref": { "type": "string" },
+        "concurrent": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/step" }
+        },
+        "os": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}
