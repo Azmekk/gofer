@@ -1,0 +1,46 @@
+{
+  "tasks": {
+    "consult-duck": {
+      "desc": "Explain your bug to the rubber duck",
+      "params": [
+        { "name": "bug", "default": "it works on my machine" }
+      ],
+      "steps": [
+        { "cmd": "echo Dear Rubber Duck," },
+        { "cmd": "echo I have a bug: {{.bug}}" },
+        { "cmd": "echo Let me explain what the code should do..." },
+        { "cmd": "echo Wait... I think I see it now." },
+        { "cmd": "echo Thank you, Rubber Duck." }
+      ]
+    },
+    "blame": {
+      "desc": "Investigate who broke it",
+      "group": "forensics",
+      "steps": [
+        { "cmd": "echo === Git Blame Forensics ===" },
+        { "cmd": "echo Analyzing commit history..." },
+        { "cmd": "echo Suspect identified: it was you, 3 weeks ago." },
+        { "cmd": "echo Case closed." }
+      ]
+    },
+    "full-debug": {
+      "desc": "Full debugging session: consult duck then investigate",
+      "group": "forensics",
+      "steps": [
+        { "ref": "consult-duck" },
+        { "ref": "blame" }
+      ]
+    },
+    "fix": {
+      "desc": "Apply the platform-specific fix",
+      "group": "platform-fixes",
+      "steps": [
+        { "cmd": "echo Applying fix..." },
+        { "name": "linux-fix", "cmd": "echo Linux: chmod +x fix.sh and pray", "os": "linux" },
+        { "name": "mac-fix", "cmd": "echo macOS: have you tried turning it off and on again?", "os": "darwin" },
+        { "name": "windows-fix", "cmd": "echo Windows: deleting node_modules and reinstalling", "os": "windows" },
+        { "cmd": "echo Fix applied! (hopefully)" }
+      ]
+    }
+  }
+}

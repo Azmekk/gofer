@@ -1,0 +1,55 @@
+{
+  "tasks": {
+    "ideate": {
+      "desc": "Brainstorm the next big thing",
+      "params": [
+        { "name": "buzzword", "default": "AI-powered blockchain" }
+      ],
+      "steps": [
+        { "cmd": "echo === Hackathon Ideation ===" },
+        { "cmd": "echo Buzzword of the day: {{.buzzword}}" },
+        { "cmd": "echo Idea: A {{.buzzword}} app that disrupts something" },
+        { "cmd": "echo Team agrees this is genius." }
+      ]
+    },
+    "setup": {
+      "desc": "Set up the project scaffolding",
+      "group": "sprint",
+      "steps": [
+        { "cmd": "echo Setting up project..." },
+        {
+          "concurrent": [
+            { "name": "frontend", "cmd": "echo Initializing React app... && echo Installing 847 npm packages... && echo Configuring webpack... && echo Frontend ready!" },
+            { "name": "backend", "cmd": "echo Spinning up Go server... && echo Setting up routes... && echo Connecting middleware... && echo Backend ready!" },
+            { "name": "database", "cmd": "echo Creating database schema... && echo Running migrations... && echo Seeding test data... && echo Database ready!" }
+          ]
+        },
+        { "cmd": "echo All systems go!" }
+      ]
+    },
+    "code-sprint": {
+      "desc": "The main coding sprint",
+      "group": "sprint",
+      "steps": [
+        { "ref": "ideate" },
+        { "ref": "setup" },
+        { "cmd": "echo Hacking furiously for 12 hours..." },
+        { "cmd": "echo Code sprint complete. Time for demo!" }
+      ]
+    },
+    "demo": {
+      "desc": "Present to the judges",
+      "group": "presentation",
+      "steps": [
+        { "cmd": "echo === Demo Time ===" },
+        {
+          "concurrent": [
+            { "name": "slides", "cmd": "echo Loading presentation... && echo Slide 1: The Problem && echo Slide 2: Our Solution && echo Slide 3: Live Demo" },
+            { "name": "live-demo", "cmd": "echo Starting live demo server... && echo Demo loading... && echo Please ignore that error... && echo Demo works! (on second try)" }
+          ]
+        },
+        { "cmd": "echo Thank you judges! Any questions?" }
+      ]
+    }
+  }
+}

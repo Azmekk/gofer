@@ -14,6 +14,8 @@ A JSON-based task runner for defining and executing parameterized shell commands
 - Circular reference detection
 - Built-in config validation
 - Cross-platform: `sh -c` on unix, `cmd /C` on windows
+- Step output formatting with status indicators (▸/✓/✗) and colored `[label]` prefixes for concurrent output
+- Remote configs via `--config https://...`
 
 ## Installation
 
@@ -75,6 +77,42 @@ gofer compile -p output=myapp
 gofer compile -c other-config.json
 ```
 
+### Output
+
+When running tasks, gofer prints status indicators for each step:
+
+- `▸ label` — step starting (bold)
+- `✓ label` — step succeeded (green)
+- `✗ label: error` — step failed (red)
+
+For concurrent steps, output from each sub-step is prefixed with a colored `[label]` tag so you can tell which step produced which output:
+
+```
+▸ concurrent (2 steps)
+  [lint]   src/main.go:12 warning: unused var
+  [test]   PASS (4 tests)
+✓ concurrent (2 steps)
+```
+
+Step labels are derived from the step's `name` field if set, otherwise from the command (truncated to 40 chars) or ref name. Set `NO_COLOR=1` to disable colors.
+
+### Remote configs
+
+You can point `--config` at a URL to fetch a remote `gofer.json`:
+
+```
+gofer --config https://example.com/gofer.json build
+```
+
+This works with all commands (`list`, `validate`, task execution). The env file path is resolved relative to CWD regardless of where the config was loaded from.
+
+Try the included examples remotely:
+
+```
+gofer -c https://raw.githubusercontent.com/Azmekk/gofer/main/examples/coffee-break.json brew
+gofer -c https://raw.githubusercontent.com/Azmekk/gofer/main/examples/hackathon.json setup
+```
+
 ### Listing tasks
 
 ```
@@ -107,7 +145,7 @@ Checks `gofer.json` for structural errors and prints them.
 
 | Flag | Short | Default | Description |
 |------|-------|---------|-------------|
-| `--config` | `-c` | `gofer.json` | Path to config file |
+| `--config` | `-c` | `gofer.json` | Path or URL to config file |
 | `--param` | `-p` | | Task parameter (`key=value`), repeatable |
 | `--version` | `-v` | | Print version |
 | `--update` | | | Update gofer to the latest version |
@@ -150,8 +188,8 @@ The config file is `gofer.json` at project root. Full example:
         { "ref": "compile" },
         {
           "concurrent": [
-            { "cmd": "echo 'task A'" },
-            { "cmd": "echo 'task B'" }
+            { "name": "task-a", "cmd": "echo 'task A'" },
+            { "name": "task-b", "cmd": "echo 'task B'" }
           ]
         }
       ]
@@ -192,11 +230,32 @@ Each step must have exactly one of `cmd`, `ref`, or `concurrent`.
 | `cmd` | Shell command (Go template syntax for parameters) |
 | `ref` | Reference to another task by name (e.g. `"compile"`) |
 | `concurrent` | Array of steps to run in parallel |
+| `name` | Optional display label for the step (used in output formatting) |
 | `os` | Restrict to an OS: `linux`, `darwin`, `windows`, or `*` (default: run always) |
 
 ### Environment file
 
 The env file (`.env.gofer` by default) uses `KEY=VALUE` format, one per line. Lines starting with `#` are comments. Variables are merged on top of the host environment -- env file values take precedence over existing host variables.
+
+## Examples
+
+The `examples/` directory contains sample configs you can run directly:
+
+- **`coffee-break.json`** — Parameterized coffee brewing, concurrent standup simulation, and a Friday deploy. Demonstrates params with defaults, concurrent steps, and groups.
+- **`rubber-duck.json`** — Rubber duck debugging suite. Demonstrates ref steps (task composition), OS filtering per platform, and groups.
+- **`hackathon.json`** — Hackathon speedrun from ideation to demo. Demonstrates ref chaining, concurrent project setup, and groups.
+
+```
+gofer -c examples/coffee-break.json brew
+gofer -c examples/rubber-duck.json full-debug
+gofer -c examples/hackathon.json setup
+```
+
+## Development
+
+```
+cd src && go test ./...
+```
 
 ## License
 
