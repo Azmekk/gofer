@@ -16,7 +16,7 @@ var listCmd = &cobra.Command{
 }
 
 func runList(cmd *cobra.Command, args []string) error {
-	cfg, _, err := config.Load(configPath)
+	cfg, _, err := config.LoadAuto(configPath)
 	if err != nil {
 		return err
 	}

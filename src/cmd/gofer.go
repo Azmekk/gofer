@@ -37,7 +37,7 @@ var rootCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.PersistentFlags().StringVarP(&configPath, "config", "c", "gofer.json", "path to config file")
+	rootCmd.PersistentFlags().StringVarP(&configPath, "config", "c", "gofer.json", "path or URL to config file")
 	rootCmd.PersistentFlags().Bool("update", false, "update gofer to the latest version")
 	rootCmd.Flags().StringArrayVarP(&paramFlags, "param", "p", nil, "task parameter in key=value format")
 
@@ -60,7 +60,7 @@ func runTask(cmd *cobra.Command, args []string) error {
 	taskRef := args[0]
 	positionalArgs := args[1:]
 
-	cfg, raw, err := config.Load(configPath)
+	cfg, raw, err := config.LoadAuto(configPath)
 	if err != nil {
 		return err
 	}

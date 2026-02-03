@@ -38,6 +38,7 @@
     "step": {
       "type": "object",
       "properties": {
+        "name": { "type": "string" },
         "cmd": { "type": "string" },
         "ref": { "type": "string" },
         "concurrent": {

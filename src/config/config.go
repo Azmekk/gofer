@@ -3,6 +3,8 @@ package config
 import (
 	"encoding/json"
 	"fmt"
+	"io"
+	"net/http"
 	"os"
 	"strings"
 )
@@ -13,6 +15,7 @@ type Param struct {
 }
 
 type Step struct {
+	Name       string `json:"name,omitempty"`
 	Cmd        string `json:"cmd,omitempty"`
 	Ref        string `json:"ref,omitempty"`
 	Concurrent []Step `json:"concurrent,omitempty"`
@@ -47,6 +50,41 @@ func Load(path string) (*GoferConfig, []byte, error) {
 	}
 
 	return &cfg, data, nil
+}
+
+func LoadFromURL(url string) (*GoferConfig, []byte, error) {
+	resp, err := http.Get(url)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to fetch remote config: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, nil, fmt.Errorf("failed to fetch remote config: %s", resp.Status)
+	}
+
+	data, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to read remote config: %w", err)
+	}
+
+	var cfg GoferConfig
+	if err := json.Unmarshal(data, &cfg); err != nil {
+		return nil, nil, fmt.Errorf("failed to parse config: %w", err)
+	}
+
+	if cfg.EnvFile == "" {
+		cfg.EnvFile = ".env.gofer"
+	}
+
+	return &cfg, data, nil
+}
+
+func LoadAuto(path string) (*GoferConfig, []byte, error) {
+	if strings.HasPrefix(path, "http://") || strings.HasPrefix(path, "https://") {
+		return LoadFromURL(path)
+	}
+	return Load(path)
 }
 
 func (c *GoferConfig) ResolveTask(ref string) (*Task, error) {

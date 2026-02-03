@@ -37,7 +37,7 @@ var starterConfigBase = map[string]interface{}{
 				map[string]interface{}{"name": "name", "default": "Gofer"},
 			},
 			"steps": []interface{}{
-				map[string]interface{}{"cmd": "echo 'Hello from {{.name}}!'"},
+				map[string]interface{}{"name": "greet", "cmd": "echo 'Hello from {{.name}}!'"},
 			},
 		},
 	},
