@@ -17,6 +17,28 @@ A JSON-based task runner for defining and executing parameterized shell commands
 
 ## Installation
 
+### Quick install
+
+**macOS / Linux:**
+
+```sh
+curl -sSL https://raw.githubusercontent.com/Azmekk/gofer/main/install.sh | sh
+```
+
+**Windows (PowerShell):**
+
+```powershell
+irm https://raw.githubusercontent.com/Azmekk/gofer/main/install.ps1 | iex
+```
+
+### Self-update
+
+```
+gofer --update
+```
+
+### Build from source
+
 Requires Go 1.20+.
 
 ```
@@ -87,6 +109,8 @@ Checks `gofer.json` for structural errors and prints them.
 |------|-------|---------|-------------|
 | `--config` | `-c` | `gofer.json` | Path to config file |
 | `--param` | `-p` | | Task parameter (`key=value`), repeatable |
+| `--version` | `-v` | | Print version |
+| `--update` | | | Update gofer to the latest version |
 | `--no-schema` | | | (`init` only) Omit `$schema` from generated config |
 | `--remote-schema` | | | (`init` only) Use remote GitHub URL for `$schema` instead of writing a local schema file |
 

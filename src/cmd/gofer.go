@@ -13,20 +13,32 @@ import (
 )
 
 var (
+	Version    = "dev"
 	configPath string
 	paramFlags []string
 )
 
 var rootCmd = &cobra.Command{
-	Use:   "gofer <task> [args...]",
-	Short: "Gofer - a JSON-based task runner",
-	Long:  "Gofer is a simple, cross-platform task runner configured via gofer.json.",
-	Args:  cobra.ArbitraryArgs,
-	RunE:  runTask,
+	Use:     "gofer <task> [args...]",
+	Short:   "Gofer - a JSON-based task runner",
+	Long:    "Gofer is a simple, cross-platform task runner configured via gofer.json.",
+	Version: Version,
+	Args:    cobra.ArbitraryArgs,
+	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+		if updateFlag, _ := cmd.Flags().GetBool("update"); updateFlag {
+			if err := selfUpdate(); err != nil {
+				return err
+			}
+			os.Exit(0)
+		}
+		return nil
+	},
+	RunE: runTask,
 }
 
 func init() {
 	rootCmd.PersistentFlags().StringVarP(&configPath, "config", "c", "gofer.json", "path to config file")
+	rootCmd.PersistentFlags().Bool("update", false, "update gofer to the latest version")
 	rootCmd.Flags().StringArrayVarP(&paramFlags, "param", "p", nil, "task parameter in key=value format")
 
 	rootCmd.AddCommand(listCmd)

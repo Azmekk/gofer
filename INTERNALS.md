@@ -54,6 +54,44 @@ Three step types, handled by a switch in `executeStep`:
 - **Positional args fill params in declaration order.** Named `-p` flags override by name.
 - **`init` refuses to overwrite.** If `gofer.json` already exists it errors. `--no-schema` and `--remote-schema` are mutually exclusive.
 
+## Versioning & self-update
+
+### Version injection
+
+`cmd.Version` is a package-level `var` string defaulting to `"dev"`. A normal `go build` bakes in `"dev"`. Release builds override it at link time:
+
+```
+go build -ldflags="-X github.com/Azmekk/gofer/cmd.Version=v1.0.0"
+```
+
+The `-X` flag tells the Go linker to patch a string variable by its full package path. This only works on package-level `var` strings (not `const`). The full path (`github.com/Azmekk/gofer/cmd.Version`) is required because the linker operates on compiled symbols, not source code. Cobra's `rootCmd.Version` is set to this variable, which wires up `--version` automatically.
+
+### The `--update` flag
+
+`--update` is a persistent flag (not a subcommand) to avoid colliding with user-defined task names. It is checked in `PersistentPreRunE` on the root command — if set, `selfUpdate()` runs and the process exits before any task logic.
+
+### Self-update logic (`cmd/update.go`)
+
+1. Queries the GitHub releases API for the latest tag.
+2. Compares the tag against `cmd.Version` (simple string equality — both are git tags like `v0.1.0`).
+3. Constructs a download URL based on `runtime.GOOS` and `runtime.GOARCH` (pattern: `gofer-{os}-{arch}[.exe]`).
+4. Downloads the binary to a temp file next to the current executable (via `os.Executable()` + `filepath.EvalSymlinks`).
+5. Downloads `checksums.txt` and verifies SHA256. If checksums are unavailable, it warns and continues.
+6. Replaces the binary:
+   - **Linux/macOS:** `os.Rename` (atomic on same filesystem).
+   - **Windows:** Renames current exe to `.old`, then renames temp to the original path. The `.old` file lingers until the next update.
+
+### Release pipeline (`.github/workflows/release.yml`)
+
+Triggered on `v*` tag pushes. Two jobs:
+- **`build`** — matrix of 6 targets (linux/darwin/windows × amd64/arm64). Cross-compiles with `CGO_ENABLED=0` and injects the tag as `cmd.Version` via `-ldflags`.
+- **`release`** — downloads all artifacts, generates `checksums.txt` via `sha256sum`, and publishes a GitHub release with `softprops/action-gh-release@v2`.
+
+### Installer scripts
+
+- **`install.sh`** — POSIX shell, curl-pipeable. Detects OS/arch via `uname`, fetches latest release tag from GitHub API (parsed with `grep`/`cut`, no `jq`), downloads binary, best-effort SHA256 verification (tries `sha256sum` then `shasum`), installs to `$GOFER_INSTALL_DIR` or a platform-appropriate default.
+- **`install.ps1`** — PowerShell 5.1+. Uses `Invoke-RestMethod` for native JSON parsing, `Get-FileHash` for SHA256 verification, installs to `$env:LOCALAPPDATA\gofer` by default, adds to user PATH via registry if needed.
+
 ## Things to keep in mind
 
 1. **No test suite.** Changes should be smoke-tested manually with `go build && bin/gofer init && bin/gofer hello`.

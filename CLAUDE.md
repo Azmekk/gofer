@@ -17,6 +17,8 @@ src/bin/gofer init                          # create starter gofer.json
 src/bin/gofer <task> [args...]              # run a task
 src/bin/gofer list                           # list available tasks
 src/bin/gofer validate                       # validate gofer.json
+src/bin/gofer --version                     # print version
+src/bin/gofer --update                      # self-update to latest release
 ```
 
 ## Quick Smoke Test
@@ -51,3 +53,10 @@ Gofer is a JSON-based task runner (~700 lines of Go) built with Cobra. All sourc
 - OS filtering per step: `linux`, `darwin`, `windows`, or `*`
 - Template resolution uses `missingkey=error` to fail on undefined parameters
 - Circular reference detection via a `running map[string]bool` on the Executor struct
+
+## Versioning & Releases
+
+- `cmd.Version` defaults to `"dev"`. CI injects the real version via `-ldflags "-X github.com/Azmekk/gofer/cmd.Version=..."`. See [INTERNALS.md](INTERNALS.md) for how this works.
+- `--update` flag triggers self-update via GitHub releases. `--version` prints the version.
+- `.github/workflows/release.yml` builds 6 cross-platform binaries on `v*` tag pushes.
+- `install.sh` and `install.ps1` are curl/irm-pipeable installer scripts in the project root.
