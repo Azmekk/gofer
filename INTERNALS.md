@@ -30,13 +30,14 @@ Despite shipping a `gofer_schema.json` (JSON Schema Draft 7), **the validator do
 - **Duplicate task key detection** — Go's `json.Unmarshal` silently takes the last value when there are duplicate keys. The validator works around this by manually tokenizing the JSON with `json.NewDecoder` and tracking seen keys. This is the most intricate piece of code in the project.
 - **Step validation enforces "exactly one of cmd/ref/concurrent".** This is the core structural invariant.
 - **OS values are validated against a hardcoded allowlist:** `linux`, `darwin`, `windows`, `*`.
+- **Shell values are validated against a hardcoded allowlist:** `sh`, `bash`, `cmd`, `powershell`, `pwsh`.
 - **The schema JSON is embedded via `//go:embed`** so the `init` command can write it to disk without bundling a separate file.
 
 ### `executor` — the runtime engine
 
 Three step types, handled by a switch in `executeStep`:
 
-1. **`cmd`** — template-resolve the string, then shell out via `sh -c` (or `cmd /C` on Windows).
+1. **`cmd`** — template-resolve the string, then shell out via the configured shell (see below).
 2. **`ref`** — recursively call `RunTask` on another task.
 3. **`concurrent`** — fan out with goroutines, collect errors with a mutex, join with `errors.Join`.
 
@@ -46,6 +47,7 @@ Three step types, handled by a switch in `executeStep`:
 - **`missingkey=error`** on the template means `{{.foo}}` with no `foo` in params is a hard error, not an empty string.
 - **Concurrent steps all run to completion.** One failure does not cancel the others. Errors are collected behind a mutex and joined.
 - **`os.Stdin` is connected** so commands can be interactive.
+- **Shell selection** — Steps can specify a `shell` field to override the default. Supported values: `sh`, `bash`, `cmd`, `powershell`, `pwsh`. If not specified, defaults to `bash` on Linux/macOS and `powershell` on Windows. PowerShell invocations use `-NoProfile` for faster, more predictable execution.
 
 ### `env` — environment loading
 

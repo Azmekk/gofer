@@ -268,5 +268,17 @@ func validateStep(path string, raw interface{}) []error {
 		}
 	}
 
+	if shellVal, ok := step["shell"]; ok {
+		if shellStr, ok := shellVal.(string); ok {
+			validShells := map[string]bool{
+				"sh": true, "bash": true, "cmd": true,
+				"powershell": true, "pwsh": true,
+			}
+			if !validShells[shellStr] {
+				errs = append(errs, fmt.Errorf("step %q: invalid shell value %q (must be sh, bash, cmd, powershell, or pwsh)", path, shellStr))
+			}
+		}
+	}
+
 	return errs
 }

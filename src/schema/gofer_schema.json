@@ -47,6 +47,11 @@
         },
         "os": {
           "type": "string"
+        },
+        "shell": {
+          "type": "string",
+          "enum": ["sh", "bash", "cmd", "powershell", "pwsh"],
+          "description": "Shell to use for command execution. Defaults to bash on Linux/macOS, powershell on Windows."
         }
       }
     }
