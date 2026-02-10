@@ -66,11 +66,11 @@
           "concurrent": [
             {
               "name": "lint",
-              "cmd": "echo Checking style... && echo 47 warnings found && echo Ignoring all of them && echo Lint passed (sort of)"
+              "cmd": "echo Checking style... && echo 47 warnings found && echo Ignoring all of them && echo Lint passed \"(sort of)\""
             },
             {
               "name": "test",
-              "cmd": "echo Running unit tests... && echo 12 passed, 3 skipped && echo Running integration tests... && echo All green (probably)"
+              "cmd": "echo Running unit tests... && echo 12 passed, 3 skipped && echo Running integration tests... && echo \"All green (probably)\""
             },
             {
               "name": "build",
